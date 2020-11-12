@@ -33,6 +33,11 @@ def lerner_correction(blue, uv):
     
     return [dFF, std_dFF]
 
+def convert2zscore(signal):
+    mean = np.mean(signal)
+    sd = np.std(signal)
+    return (signal-mean) / sd
+
 def remcheck(val, range1, range2):
     # function checks whether value is within range of two decimels
     if (range1 < range2):

@@ -9,42 +9,43 @@ import tdt
 import xlrd
 import csv
 import numpy as np
+import trompy as tp
 
 import dill
 
 from fx4assembly import *
 
-def metafilemaker(xlfile, metafilename, sheetname='metafile', fileformat='csv'):
-    with xlrd.open_workbook(xlfile) as wb:
-        sh = wb.sheet_by_name(sheetname)  # or wb.sheet_by_name('name_of_the_sheet_here')
+# def metafilemaker(xlfile, metafilename, sheetname='metafile', fileformat='csv'):
+#     with xlrd.open_workbook(xlfile) as wb:
+#         sh = wb.sheet_by_name(sheetname)  # or wb.sheet_by_name('name_of_the_sheet_here')
         
-        if fileformat == 'csv':
-            with open(metafilename+'.csv', 'w', newline="") as f:
-                c = csv.writer(f)
-                for r in range(sh.nrows):
-                    c.writerow(sh.row_values(r))
-        if fileformat == 'txt':
-            with open(metafilename+'.txt', 'w', newline="") as f:
-                c = csv.writer(f, delimiter="\t")
-                for r in range(sh.nrows):
-                    c.writerow(sh.row_values(r))
+#         if fileformat == 'csv':
+#             with open(metafilename+'.csv', 'w', newline="") as f:
+#                 c = csv.writer(f)
+#                 for r in range(sh.nrows):
+#                     c.writerow(sh.row_values(r))
+#         if fileformat == 'txt':
+#             with open(metafilename+'.txt', 'w', newline="") as f:
+#                 c = csv.writer(f, delimiter="\t")
+#                 for r in range(sh.nrows):
+#                     c.writerow(sh.row_values(r))
     
-def metafilereader(filename):
+# def metafilereader(filename):
     
-    f = open(filename, 'r')
-    f.seek(0)
-    header = f.readlines()[0]
-    f.seek(0)
-    filerows = f.readlines()[1:]
+#     f = open(filename, 'r')
+#     f.seek(0)
+#     header = f.readlines()[0]
+#     f.seek(0)
+#     filerows = f.readlines()[1:]
     
-    tablerows = []
+#     tablerows = []
     
-    for i in filerows:
-        tablerows.append(i.split('\t'))
+#     for i in filerows:
+#         tablerows.append(i.split('\t'))
         
-    header = header.split('\t')
-    # need to find a way to strip end of line \n from last column - work-around is to add extra dummy column at end of metafile
-    return tablerows, header
+#     header = header.split('\t')
+#     # need to find a way to strip end of line \n from last column - work-around is to add extra dummy column at end of metafile
+#     return tablerows, header
 
 def loaddata(tdtfile, SigBlue, SigUV):
     
@@ -68,7 +69,7 @@ def loaddata(tdtfile, SigBlue, SigUV):
         
     return data, dataUV, fs, ttls
 
-def process_rat(row_data, sessiontype='dis'):
+def process_rat(row_data, sessiontype='dis', get_trialtype=False):
     print('yo there', row_data[2])
     ratdata={}
     ratdata['rat'] = row_data[2]
@@ -85,6 +86,7 @@ def process_rat(row_data, sessiontype='dis'):
     ratdata['uv'] = uv
     ratdata['fs'] = fs
     ratdata['filt'] = filt
+    ratdata['z'] = convert2zscore(filt)
     ratdata['tick'] = ttls.Tick.onset
     
     try:
@@ -100,19 +102,26 @@ def process_rat(row_data, sessiontype='dis'):
     ratdata['distractors'] = distractionCalc2(ratdata['licks']) 
     [ratdata['distracted'], ratdata['notdistracted']], ratdata['d_bool_array'], ratdata['pdp'], ratdata['pre_dp']  = distracted_or_not(ratdata['distractors'], ratdata['licks'])
     
+    if get_trialtype == True:
+        medfile = medfilefolder + row_data[1]
+        ratdata["trialtype"] = tp.medfilereader(medfile, varsToExtract=["j"])[1:]
+    else:
+        ratdata["trialtype"] = []
+    
     return ratdata
 
 # declares locations for data and required files
 raw_datafolder = 'D:\\DA_and_Reward\\kp259\\THPH1AND2\\tdtfiles\\'
 folder = "C:\\Github\\Distraction-Paper\\"
 datafolder = folder+"data\\"
+medfilefolder = datafolder + "medfiles\\"
 xlfile = datafolder+"distraction_photo_metafile.xlsx"
 metafile = datafolder+"metafile"
 sheetname="THPH1&2Metafile"
 
 # extracts data from metafile
-metafilemaker(xlfile, metafile, sheetname=sheetname, fileformat='txt')
-rows, header = metafilereader(metafile + '.txt')
+tp.metafilemaker(xlfile, metafile, sheetname=sheetname, fileformat='txt')
+rows, header = tp.metafilereader(metafile + '.txt')
 
 # creates lists that include row indexes for last lick,  distraction, and hab days
 rows_mod = []
@@ -138,18 +147,18 @@ for idx in rows_mod:
     modDict[ratdata['rat']] = ratdata
 
 for idx in rows_dis:       
-    ratdata = process_rat(rows[idx])
+    ratdata = process_rat(rows[idx], get_trialtype=True)
     disDict[ratdata['rat']] = ratdata
     
 for idx in rows_hab:       
-    ratdata = process_rat(rows[idx])
+    ratdata = process_rat(rows[idx], get_trialtype=True)
     habDict[ratdata['rat']] = ratdata
     
 # Saves pickle file with three dictionaries that can be used by Kate's old script
 # or new scripts for further analysis
     
 savefile=True
-outputfile=datafolder+'distraction_data.pickle'
+outputfile=datafolder+'distraction_data_with_zscore.pickle'
 
 if savefile == True:
     pickle_out = open(outputfile, 'wb')
