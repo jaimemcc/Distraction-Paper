@@ -15,37 +15,6 @@ import dill
 
 from fx4assembly import *
 
-# def metafilemaker(xlfile, metafilename, sheetname='metafile', fileformat='csv'):
-#     with xlrd.open_workbook(xlfile) as wb:
-#         sh = wb.sheet_by_name(sheetname)  # or wb.sheet_by_name('name_of_the_sheet_here')
-        
-#         if fileformat == 'csv':
-#             with open(metafilename+'.csv', 'w', newline="") as f:
-#                 c = csv.writer(f)
-#                 for r in range(sh.nrows):
-#                     c.writerow(sh.row_values(r))
-#         if fileformat == 'txt':
-#             with open(metafilename+'.txt', 'w', newline="") as f:
-#                 c = csv.writer(f, delimiter="\t")
-#                 for r in range(sh.nrows):
-#                     c.writerow(sh.row_values(r))
-    
-# def metafilereader(filename):
-    
-#     f = open(filename, 'r')
-#     f.seek(0)
-#     header = f.readlines()[0]
-#     f.seek(0)
-#     filerows = f.readlines()[1:]
-    
-#     tablerows = []
-    
-#     for i in filerows:
-#         tablerows.append(i.split('\t'))
-        
-#     header = header.split('\t')
-#     # need to find a way to strip end of line \n from last column - work-around is to add extra dummy column at end of metafile
-#     return tablerows, header
 
 def loaddata(tdtfile, SigBlue, SigUV):
     
@@ -77,16 +46,24 @@ def process_rat(row_data, sessiontype='dis', get_trialtype=False):
     # gets photometry signals from TDT file and performs correction
     blue, uv, fs, ttls = loaddata(row_data[0], row_data[12], row_data[13])   
     
+    # sets start and stop of good signal from values in metafile (entered by hand)
+    datarange=[int(np.float(row_data[19])), int(np.float(row_data[20]))]
+    
     # first line uses Vaibhav correction, second uses Lerner correction
     # filt = correctforbaseline(blue, uv)
     filt, filt_sd = lerner_correction(blue, uv)
+    
+    rms = np.sqrt(np.mean(np.square(filt[datarange[0]:datarange[1]])))
+    ratdata["rms"] = rms
+    print(rms)
     
     # assigns photometry data to output dictionary
     ratdata['blue'] = blue
     ratdata['uv'] = uv
     ratdata['fs'] = fs
     ratdata['filt'] = filt
-    ratdata['z'] = convert2zscore(filt)
+#    ratdata['z'] = convert2zscore(filt, zrange=[int(np.float(row_data[19])), int(np.float(row_data[20]))])
+    ratdata['deltaF'] = filt / rms
     ratdata['tick'] = ttls.Tick.onset
     
     try:
@@ -158,7 +135,7 @@ for idx in rows_hab:
 # or new scripts for further analysis
     
 savefile=True
-outputfile=datafolder+'distraction_data_with_zscore.pickle'
+outputfile=datafolder+'distraction_data.pickle'
 
 if savefile == True:
     pickle_out = open(outputfile, 'wb')

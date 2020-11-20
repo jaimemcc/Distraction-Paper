@@ -59,30 +59,31 @@ pickle_in = open(outputfolder+"data4roc_licks.pickle", 'rb')
 # list of comparisons
 
 # Uncomment to run lick comparisons
+n4shuf = 2000 # change to 2000 for proper comparison
 
 # ### Comparison of lick data between distracted and non-distracted trials on distraction day 
-# a, p = run_roc_comparison([dis_notdis_hist, dis_dis_hist], n4shuf=2000,
+# a, p = run_roc_comparison([dis_notdis_hist, dis_dis_hist], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_licks_disday_disVnondis.pickle")
 
-# # Comparison of lick data between modelled and distraction day for distracted trials 
-# a, p = run_roc_comparison([mod_dis_hist, dis_dis_hist], n4shuf=2000,
+# # # Comparison of lick data between modelled and distraction day for distracted trials 
+# a, p = run_roc_comparison([mod_dis_hist, dis_dis_hist], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_licks_distrials_modVdis.pickle")
 
-# # Comparison of lick data between modelled and distraction day for NOT distracted trials 
-# a, p = run_roc_comparison([mod_notdis_hist, dis_notdis_hist], n4shuf=2000,
+# # # Comparison of lick data between modelled and distraction day for NOT distracted trials 
+# a, p = run_roc_comparison([mod_notdis_hist, dis_notdis_hist], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_licks_notdistrials_modVdis.pickle")
 
-# Comparison of lick data between distraction and habituation day for ALL trials 
+# # Comparison of lick data between distraction and habituation day for ALL trials 
 
-dis_all_hist = dis_notdis_hist + dis_dis_hist
-hab_all_hist = hab_notdis_hist + hab_dis_hist
-# a, p = run_roc_comparison([dis_all_hist, hab_all_hist], n4shuf=2000,
+# dis_all_hist = dis_notdis_hist + dis_dis_hist
+# hab_all_hist = hab_notdis_hist + hab_dis_hist
+# a, p = run_roc_comparison([dis_all_hist, hab_all_hist], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_licks_alltrials_disVhab.pickle")
 
 
 # Loads data for ROC analysis on photometry snips
 pickle_in = open(outputfolder+"data4roc_photo.pickle", 'rb')
-[mod_dis_photo_snips_flat, mod_notdis_photo_snips_flat, dis_dis_photo_snips_flat, dis_notdis_photo_snips_flat, hab_dis_photo_snips_flat, hab_notdis_photo_snips_flat] = dill.load(pickle_in)
+[mod_dis_photo_snips_flat, mod_notdis_photo_snips_flat, dis_dis_photo_snips_flat, dis_notdis_photo_snips_flat, dis_dis_filt_photo_snips_flat, dis_notdis_filt_photo_snips_flat, hab_dis_photo_snips_flat, hab_notdis_photo_snips_flat] = dill.load(pickle_in)
 
 # makes lists of all snips for each day (distracted and not distracted trials)
 mod_all_photo_snips_flat = mod_dis_photo_snips_flat + mod_notdis_photo_snips_flat
@@ -90,28 +91,32 @@ dis_all_photo_snips_flat = dis_dis_photo_snips_flat + dis_notdis_photo_snips_fla
 hab_all_photo_snips_flat = hab_dis_photo_snips_flat + hab_notdis_photo_snips_flat
 
 # ### Comparison of photometry data between modelled, distraction, and hab day for ALL trials 
-# a, p = run_roc_comparison([mod_all_photo_snips_flat, dis_all_photo_snips_flat], n4shuf=2000,
+# a, p = run_roc_comparison([mod_all_photo_snips_flat, dis_all_photo_snips_flat], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_photo_alltrials_modVdis.pickle")
 
-# a, p = run_roc_comparison([mod_all_photo_snips_flat, hab_all_photo_snips_flat], n4shuf=2000,
+# a, p = run_roc_comparison([mod_all_photo_snips_flat, hab_all_photo_snips_flat], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_photo_alltrials_modVhab.pickle")
 
-# a, p = run_roc_comparison([dis_all_photo_snips_flat, hab_all_photo_snips_flat], n4shuf=2000,
+# a, p = run_roc_comparison([dis_all_photo_snips_flat, hab_all_photo_snips_flat], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_photo_alltrials_disVhab.pickle")
 
 # ### Comparison of photometry data between distracted and non-distracted trials for each day in turn 
-# a, p = run_roc_comparison([mod_notdis_photo_snips_flat, mod_dis_photo_snips_flat], n4shuf=2000,
+# a, p = run_roc_comparison([mod_notdis_photo_snips_flat, mod_dis_photo_snips_flat], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_photo_modday_disVnotdis.pickle")
 
-# a, p = run_roc_comparison([dis_notdis_photo_snips_flat, dis_dis_photo_snips_flat], n4shuf=2000,
+# a, p = run_roc_comparison([dis_notdis_photo_snips_flat, dis_dis_photo_snips_flat], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_photo_disday_disVnotdis.pickle")
 
-# a, p = run_roc_comparison([hab_notdis_photo_snips_flat, hab_dis_photo_snips_flat], n4shuf=2000,
+# a, p = run_roc_comparison([hab_notdis_photo_snips_flat, hab_dis_photo_snips_flat], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_photo_habday_disVnotdis.pickle")
 
-# a, p = run_roc_comparison([dis_dis_photo_snips_flat, hab_dis_photo_snips_flat], n4shuf=2000,
+# a, p = run_roc_comparison([dis_dis_photo_snips_flat, hab_dis_photo_snips_flat], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_photo_distrials_disVhab.pickle")
 
-# a, p = run_roc_comparison([dis_notdis_photo_snips_flat, hab_notdis_photo_snips_flat], n4shuf=2000,
+# a, p = run_roc_comparison([dis_notdis_photo_snips_flat, hab_notdis_photo_snips_flat], n4shuf=n4shuf,
 #                           savedata=outputfolder+"roc_photo_notdistrials_disVhab.pickle")
 
+
+# ### Comparison of photometry data between distracted and non-distracted trials for each day in turn USING non-Zscored SIGNAL
+a, p = run_roc_comparison([dis_notdis_filt_photo_snips_flat, dis_dis_filt_photo_snips_flat], n4shuf=n4shuf,
+                          savedata=outputfolder+"roc_photo_disday_disVnotdis_filt.pickle")

@@ -79,6 +79,9 @@ datafolder = "C:\\Github\\Distraction-Paper\\data\\"
 figfolder = "C:\\Github\\Distraction-Paper\\figs\\"
 outputfolder = "C:\\Github\\Distraction-Paper\\output\\"
 
+signal2use = "filt_z"
+signal2use_noBLadj = "filt"
+
 try:
     pickle_in = open(datafolder + "distraction_data_only_snips.pickle", 'rb')
 except FileNotFoundError:
@@ -157,35 +160,44 @@ mod_dis_photo_snips, mod_notdis_photo_snips, = [], []
 dis_dis_photo_snips, dis_notdis_photo_snips, = [], []
 hab_dis_photo_snips, hab_notdis_photo_snips, = [], []
 
+# These lists are for exploring the non-Z-scored signals on distraction day
+dis_dis_filt_photo_snips, dis_notdis_filt_photo_snips, = [], []
+
 rats=disDict.keys()
 
 for rat in rats:
     d = disDict[rat]
     
-    snips_dis = resample_snips(d['snips_distracted']['filt_z'])
+    snips_dis = resample_snips(d['snips_distracted'][signal2use])
     dis_dis_photo_snips.append(snips_dis)
     
-    snips_notdis = resample_snips(d['snips_not-distracted']['filt_z'])
+    snips_notdis = resample_snips(d['snips_not-distracted'][signal2use])
     dis_notdis_photo_snips.append(snips_notdis)
+    
+    snips_dis_filt = resample_snips(d['snips_distracted'][signal2use_noBLadj]) 
+    dis_dis_filt_photo_snips.append(snips_dis_filt)
+    
+    snips_notdis_filt = resample_snips(d['snips_not-distracted'][signal2use_noBLadj])
+    dis_notdis_filt_photo_snips.append(snips_notdis_filt)
     
     d = modDict[rat]
     
-    snips_dis = resample_snips(d['snips_distracted']['filt_z'])
+    snips_dis = resample_snips(d['snips_distracted'][signal2use])
     mod_dis_photo_snips.append(snips_dis)
     
-    snips_notdis = resample_snips(d['snips_not-distracted']['filt_z'])
+    snips_notdis = resample_snips(d['snips_not-distracted'][signal2use])
     mod_notdis_photo_snips.append(snips_notdis)
     
     d = habDict[rat]
     
-    snips_dis = resample_snips(d['snips_distracted']['filt_z'])
+    snips_dis = resample_snips(d['snips_distracted'][signal2use])
     hab_dis_photo_snips.append(snips_dis)
     
-    snips_notdis = resample_snips(d['snips_not-distracted']['filt_z'])
+    snips_notdis = resample_snips(d['snips_not-distracted'][signal2use])
     hab_notdis_photo_snips.append(snips_notdis)
     
 pickle_out = open(outputfolder+"data4epochs_photo.pickle", 'wb')
-dill.dump([ mod_dis_photo_snips, mod_notdis_photo_snips, dis_dis_photo_snips, dis_notdis_photo_snips, hab_dis_photo_snips, hab_notdis_photo_snips], pickle_out)
+dill.dump([ mod_dis_photo_snips, mod_notdis_photo_snips, dis_dis_photo_snips, dis_notdis_photo_snips, dis_dis_filt_photo_snips, dis_notdis_filt_photo_snips, hab_dis_photo_snips, hab_notdis_photo_snips], pickle_out)
 pickle_out.close()
 
 # flattens all lists
@@ -194,6 +206,9 @@ mod_notdis_photo_snips_flat = flatten_list(mod_notdis_photo_snips)
 
 dis_dis_photo_snips_flat = flatten_list(dis_dis_photo_snips)
 dis_notdis_photo_snips_flat = flatten_list(dis_notdis_photo_snips)
+
+dis_dis_filt_photo_snips_flat = flatten_list(dis_dis_filt_photo_snips)
+dis_notdis_filt_photo_snips_flat = flatten_list(dis_notdis_filt_photo_snips)
 
 hab_dis_photo_snips_flat = flatten_list(hab_dis_photo_snips)
 hab_notdis_photo_snips_flat = flatten_list(hab_notdis_photo_snips)
@@ -209,7 +224,7 @@ print(f"Number of NOT DISTRACTED trials on HABITUATION day is {len(hab_notdis_ph
 # Saves resampled and flattened photo data for each day for further ROC analysis
 
 pickle_out = open(outputfolder+"data4roc_photo.pickle", 'wb')
-dill.dump([mod_dis_photo_snips_flat, mod_notdis_photo_snips_flat, dis_dis_photo_snips_flat, dis_notdis_photo_snips_flat, hab_dis_photo_snips_flat, hab_notdis_photo_snips_flat], pickle_out)
+dill.dump([mod_dis_photo_snips_flat, mod_notdis_photo_snips_flat, dis_dis_photo_snips_flat, dis_notdis_photo_snips_flat, dis_dis_filt_photo_snips_flat, dis_notdis_filt_photo_snips_flat, hab_dis_photo_snips_flat, hab_notdis_photo_snips_flat], pickle_out)
 pickle_out.close()
     
     

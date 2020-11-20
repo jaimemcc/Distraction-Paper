@@ -169,7 +169,7 @@ def snipper(data, timelock, fs = 1, t2sMap = [], preTrial=10, trialLength=30,
               
     return snips, pps
 
-def mastersnipper(data, dataUV, data_filt,
+def mastersnipper(data, dataUV, data_filt, data_deltaF,
                   t2sMap, fs, bgMAD,
                   events,
                   bins=300,
@@ -185,7 +185,7 @@ def mastersnipper(data, dataUV, data_filt,
     
     if len(events) < 1:
         print('Cannot find any events. All outputs will be empty.')
-        blueTrials, uvTrials, filtTrials, filtTrials_z, filtTrials_z_adjBL, filt_avg, filt_avg_z, noiseindex, peak, latency = ([] for i in range(10))
+        blueTrials, uvTrials, filtTrials, filtTrials_z, filtTrials_z_adjBL, filt_avg, filt_avg_z, deltaFTrials, noiseindex, peak, latency = ([] for i in range(11))
     else:
         if verbose: print('{} events to analyze.'.format(len(events)))
         
@@ -202,6 +202,14 @@ def mastersnipper(data, dataUV, data_filt,
                                    preTrial=preTrial,
                                    trialLength=trialLength)
         filtTrials,_ = snipper(data_filt, events,
+                                   t2sMap=t2sMap,
+                                   fs=fs,
+                                   bins=bins,
+                                   preTrial=preTrial,
+                                   trialLength=trialLength,
+                                   adjustBaseline=False)
+        
+        deltaFTrials,_ = snipper(data_deltaF, events,
                                    t2sMap=t2sMap,
                                    fs=fs,
                                    bins=bins,
@@ -258,6 +266,7 @@ def mastersnipper(data, dataUV, data_filt,
     output['filt_z_adjBL'] = filtTrials_z_adjBL
     output['filt_avg'] = filt_avg
     output['filt_avg_z'] = filt_avg_z
+    output["deltaF"] = deltaFTrials
     output['noise'] = noiseindex
     output['peak'] = peak
     output['latency'] = latency
@@ -353,6 +362,7 @@ for d, s in zip([modDict, disDict, habDict],
         data = ratdata['blue']
         dataUV = ratdata['uv']
         data_filt = ratdata['filt']
+        data_deltaF = ratdata["deltaF"]
         fs = ratdata['fs']
         tick = ratdata['tick']
         
@@ -374,7 +384,7 @@ for d, s in zip([modDict, disDict, habDict],
         bgMAD = findnoise(data_filt, randomevents, t2sMap=t2sMap, fs=fs,
                           bins=bins, method='sum')
         
-        ratdata['snips_distractors'] = mastersnipper(data, dataUV, data_filt,
+        ratdata['snips_distractors'] = mastersnipper(data, dataUV, data_filt, data_deltaF,
                                                      t2sMap, fs, bgMAD,
                                                      ratdata['distractors'],
                                                      bins=200,
@@ -384,7 +394,7 @@ for d, s in zip([modDict, disDict, habDict],
                                                      latency_events=ratdata['licks'],
                                                      latency_direction='post')
         
-        ratdata['snips_distracted'] = mastersnipper(data, dataUV, data_filt,
+        ratdata['snips_distracted'] = mastersnipper(data, dataUV, data_filt, data_deltaF,
                                                       t2sMap, fs, bgMAD,
                                                       ratdata['distracted'],
                                                       bins=200,
@@ -392,7 +402,7 @@ for d, s in zip([modDict, disDict, habDict],
                                                       preTrial=5,
                                                       trialLength=20)
         
-        ratdata['snips_not-distracted'] = mastersnipper(data, dataUV, data_filt,
+        ratdata['snips_not-distracted'] = mastersnipper(data, dataUV, data_filt, data_deltaF,
                                                       t2sMap, fs, bgMAD,
                                                       ratdata['notdistracted'],
                                                       bins=200,
@@ -401,7 +411,7 @@ for d, s in zip([modDict, disDict, habDict],
                                                       trialLength=20)
 
 
-save_total_file=True
+save_total_file=False
 save_reduced_file=True
 
 # saves pickled file including full dictionaries
